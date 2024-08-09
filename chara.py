@@ -2,20 +2,64 @@ import pygame
 
 
 class Camera(pygame.sprite.Sprite):
-    def __init__(self, speed, ps):
-        self.speed = speed
+    def __init__(self, color, ps, screen):
+        super().__init__()
         self.ps = ps
+        self.color = color
+        self.screen = screen
+
+    def draw(self):
+        pygame.draw.circle(self.screen, self.color, self.ps, 20, 0)
 
 
 # 创建一个正方体
 class Square(pygame.sprite.Sprite):
     def __init__(self, size, color, ps):
+        super().__init__()
         self.size = size
         self.ps = ps
         self.color = color
 
     def draw(self, screen):
-        pygame.draw.line(screen, self.color)
+        width, height = screen.get_size()
+        x = self.ps[0]
+        y = self.ps[1]
+
+        front_top_left = (x, y)
+        front_top_right = (x + self.size, y)
+        front_bottom_left = (x, y + self.size)
+        front_bottom_right = (x + self.size, y + self.size)
+
+        back_top_left = (x + self.size // 2, y - self.size // 2)
+        back_top_right = (x + self.size + self.size // 2, y - self.size // 2)
+        back_bottom_left = (x + self.size // 2, y + self.size // 2)
+        back_bottom_right = (x + self.size + self.size // 2, y + self.size // 2)
+
+        # 绘制正方体的前面
+        # pygame.draw.polygon(screen, (125, 135, 225),
+        #                     [front_top_left, front_top_right, front_bottom_right, front_bottom_left])
+
+        # # 绘制正方体的背面
+        # pygame.draw.polygon(screen, (125, 135, 225),
+        #                     [back_top_left, back_top_right, back_bottom_right, back_bottom_left])
+
+        # 连接上下面
+        pygame.draw.line(screen, self.color, front_top_left, front_bottom_left)
+        pygame.draw.line(screen, self.color, front_top_right, front_bottom_right)
+        pygame.draw.line(screen, self.color, back_bottom_right, back_top_right)
+        pygame.draw.line(screen, self.color, back_bottom_left, back_top_left)
+
+        # 连接左右面
+        pygame.draw.line(screen, self.color, back_bottom_left, back_bottom_right)
+        pygame.draw.line(screen, self.color, back_top_right, back_top_left)
+        pygame.draw.line(screen, self.color, front_top_left, front_top_right)
+        pygame.draw.line(screen, self.color, front_bottom_left, front_bottom_right)
+
+        # 连接前后面
+        pygame.draw.line(screen, self.color, front_top_left, back_top_left)
+        pygame.draw.line(screen, self.color, front_top_right, back_top_right)
+        pygame.draw.line(screen, self.color, front_bottom_left, back_bottom_left)
+        pygame.draw.line(screen, self.color, front_bottom_right, back_bottom_right)
 
 
 class Button:

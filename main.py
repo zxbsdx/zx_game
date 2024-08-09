@@ -11,24 +11,34 @@ class Game:
         self.butt2 = None
         self.butt3 = None
         self.set_win = None
+        self.came = None
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
         pygame.display.set_caption("Zx_game_maze")
+        ico = pygame.image.load("./images/logo.ico")
+        pygame.display.set_icon(ico)
         pygame.display.gl_set_attribute(1, 2)
         self.clock = pygame.time.Clock()
 
     # 检测窗口大小 最小不能小于默认
     def scan_win(self):
-        width, height = self.screen.get_size()
-        if (width, height) < WINDOWS.size:
-            self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
+        try:
+            if self.screen.get_size() is not None:
+                width, height = self.screen.get_size()
+                if (width, height) < WINDOWS.size:
+                    self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
+        finally:
+            pass
 
     def menu(self):  # 画个开始菜单
         self.screen.fill("black")
+
+        # 修改logo的像素大小
         img = pygame.image.load("./images/logo.png")
+        re_img = pygame.transform.scale(img, (70, 50))
 
         width, height = self.screen.get_size()
-        self.screen.blit(img, (width * 0.01, height * 0.01))
+        self.screen.blit(re_img, (width * 0.01, height * 0.01))
         self.butt1 = chara.Button("Start", (width * 0.3, height * 0.4), FONT, "blue", "pink", self.screen)
         self.butt1.draw(self.screen)
         self.butt2 = chara.Button("Setting", (width * 0.5, height * 0.4), FONT, "blue", "pink", self.screen)
@@ -65,7 +75,8 @@ class Game:
 
             self.__update()  # 更新显示
 
-    def draw(self, text, color, ps, screen):
+    @staticmethod
+    def draw(text, color, ps, screen):
         font = pygame.font.Font(size=SIZE_TITLE)
         img = font.render(text, True, color)
         screen.blit(img, ps)
@@ -80,6 +91,16 @@ class Game:
                     if self.screen.get_flags() & pygame.FULLSCREEN != 0:
                         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
                     print("Esc was pressed")
+
+                elif event.key == pygame.K_a:
+                    CAME_PS.x += 10
+                    self.came.update()
+                elif event.key == pygame.K_s:
+                    pass
+                elif event.key == pygame.K_d:
+                    pass
+                elif event.key == pygame.K_w:
+                    pass
 
     @staticmethod
     def __quit():
@@ -99,16 +120,19 @@ class Game:
 
     def build_scene(self):
         self.screen.fill("white")
-        pygame.draw.line(self.screen, "pink", (20, 20), (500, 500))
+        # pygame.draw.line(self.screen, "pink", (200, 300), (500, 500))
+        self.came = chara.Camera("blue", CAME_PS.size, self.screen)
+        self.came.draw()
+        squ = chara.Square(200, "purple", (200, 300))
+        squ.draw(self.screen)
 
     def game_start(self):
         if self.screen.get_flags() & pygame.FULLSCREEN == 0:
             self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF)
 
         while True:
-            self.build_scene()
             self.event()
-            self.set_win()
+            self.build_scene()
             self.__update()
 
 
