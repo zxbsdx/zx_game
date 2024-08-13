@@ -8,5 +8,3 @@ SIZE_TITLE = 35
 FONT = pygame.font.SysFont('Times New Roman', size=SIZE_TITLE)
 
 SCENE = (1000, 1000)
-
-CAME_PS = pygame.Rect(0, 0, 300, 300)

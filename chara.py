@@ -2,13 +2,15 @@ import pygame
 
 
 class Camera(pygame.sprite.Sprite):
-    def __init__(self, color, ps, screen):
+    def __init__(self, color, ps, screen, speed=10):
         super().__init__()
         self.ps = ps
         self.color = color
         self.screen = screen
+        self.speed = speed
 
-    def draw(self):
+    def update(self, *args, **kwargs):
+        super().update()
         pygame.draw.circle(self.screen, self.color, self.ps, 20, 0)
 
 
@@ -69,10 +71,10 @@ class Button:
         self.font = font
         self.color = color
         self.hover_color = hover_color
-        self.rect = self.font.render(self.text, True, self.color).get_rect(center=pos)
         self.screen = screen
+        self.rect = self.font.render(self.text, True, self.color).get_rect(center=pos)
 
-    def draw(self, screen):
+    def draw(self):
         # 检测鼠标位置
         mouse_pos = pygame.mouse.get_pos()
         if self.rect.collidepoint(mouse_pos):

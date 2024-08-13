@@ -7,11 +7,17 @@ import sys
 class Game:
     # 窗口初始化
     def __init__(self):
+        # 初始化变量
+        self.is_dragging = False
         self.butt1 = None
         self.butt2 = None
         self.butt3 = None
         self.set_win = None
         self.came = None
+
+        self.x = 300
+        self.y = 300
+
         pygame.init()
         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
         pygame.display.set_caption("Zx_game_maze")
@@ -40,11 +46,11 @@ class Game:
         width, height = self.screen.get_size()
         self.screen.blit(re_img, (width * 0.01, height * 0.01))
         self.butt1 = chara.Button("Start", (width * 0.3, height * 0.4), FONT, "blue", "pink", self.screen)
-        self.butt1.draw(self.screen)
+        self.butt1.draw()
         self.butt2 = chara.Button("Setting", (width * 0.5, height * 0.4), FONT, "blue", "pink", self.screen)
-        self.butt2.draw(self.screen)
+        self.butt2.draw()
         self.butt3 = chara.Button("About", (width * 0.7, height * 0.4), FONT, "red", "blue", self.screen)
-        self.butt3.draw(self.screen)
+        self.butt3.draw()
         # self.draw("Start", "blue", (100, 200))
         # self.draw("Setting", "blue", (240, 200))
         # self.draw("About", "red", (400, 200))
@@ -64,7 +70,7 @@ class Game:
             self.screen.fill("black")
             self.draw("Volume", "yellow", (width * 0.5, height * 0.5), self.screen)
             back_button = chara.Button("Back", (width * 0.9, height * 0.9), FONT, "red", "blue", self.screen)
-            back_button.draw(self.screen)
+            back_button.draw()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -77,7 +83,7 @@ class Game:
 
     @staticmethod
     def draw(text, color, ps, screen):
-        font = pygame.font.Font(size=SIZE_TITLE)
+        font = pygame.font.Font(size=SIZE_TITLE, name='hehe')
         img = font.render(text, True, color)
         screen.blit(img, ps)
 
@@ -92,15 +98,32 @@ class Game:
                         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
                     print("Esc was pressed")
 
-                elif event.key == pygame.K_a:
-                    CAME_PS.x += 10
-                    self.came.update()
-                elif event.key == pygame.K_s:
-                    pass
-                elif event.key == pygame.K_d:
-                    pass
-                elif event.key == pygame.K_w:
-                    pass
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # 左键点击
+                        self.is_dragging = True
+
+                        print("左键")
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    if event.button == 1:  # 左键松开
+                        self.is_dragging = False
+
+                if event.type == pygame.MOUSEMOTION:
+                    if self.is_dragging:
+                        # 修改物体的位置
+                        mouse_x, mouse_y = event.pos
+
+        # 按键事件 为什么这需要按着鼠标才能检测到事件？？
+
+        key = pygame.key.get_pressed()
+        if key[pygame.K_a]:
+            self.x -= 10
+        if key[pygame.K_s]:
+            self.y += 10
+        if key[pygame.K_d]:
+            self.x += 10
+        if key[pygame.K_w]:
+            self.y -= 10
 
     @staticmethod
     def __quit():
@@ -109,7 +132,7 @@ class Game:
 
     def __update(self):
         pygame.display.flip()
-        self.clock.tick(FRAME)
+        self.clock.tick(60)
 
     def game_start_menu(self):
         while True:
@@ -121,8 +144,8 @@ class Game:
     def build_scene(self):
         self.screen.fill("white")
         # pygame.draw.line(self.screen, "pink", (200, 300), (500, 500))
-        self.came = chara.Camera("blue", CAME_PS.size, self.screen)
-        self.came.draw()
+        # 创建个摄像头对象
+        self.came = chara.Camera("blue", (self.x, self.y), self.screen)
         squ = chara.Square(200, "purple", (200, 300))
         squ.draw(self.screen)
 
@@ -133,6 +156,9 @@ class Game:
         while True:
             self.event()
             self.build_scene()
+
+            # 更新显示
+            self.came.update()
             self.__update()
 
 
