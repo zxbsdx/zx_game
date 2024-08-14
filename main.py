@@ -8,6 +8,12 @@ class Game:
     # 窗口初始化
     def __init__(self):
         # 初始化变量
+        self.square = None
+        self.squ = None
+        self.mouse_d = None
+        self.mouse_c = None
+        self.mouse_a = None
+        self.mouse_b = None
         self.is_dragging = False
         self.butt1 = None
         self.butt2 = None
@@ -24,6 +30,9 @@ class Game:
         ico = pygame.image.load("./images/logo.ico")
         pygame.display.set_icon(ico)
         pygame.display.gl_set_attribute(1, 2)
+        # 播放背景音乐
+        pygame.mixer.music.load(music)
+        pygame.mixer.music.play()
         self.clock = pygame.time.Clock()
 
     # 检测窗口大小 最小不能小于默认
@@ -98,23 +107,7 @@ class Game:
                         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
                     print("Esc was pressed")
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:  # 左键点击
-                        self.is_dragging = True
-
-                        print("左键")
-
-                if event.type == pygame.MOUSEBUTTONUP:
-                    if event.button == 1:  # 左键松开
-                        self.is_dragging = False
-
-                if event.type == pygame.MOUSEMOTION:
-                    if self.is_dragging:
-                        # 修改物体的位置
-                        mouse_x, mouse_y = event.pos
-
         # 按键事件 为什么这需要按着鼠标才能检测到事件？？
-
         key = pygame.key.get_pressed()
         if key[pygame.K_a]:
             self.x -= 10
@@ -146,22 +139,43 @@ class Game:
         # pygame.draw.line(self.screen, "pink", (200, 300), (500, 500))
         # 创建个摄像头对象
         self.came = chara.Camera("blue", (self.x, self.y), self.screen)
-        squ = chara.Square(200, "purple", (200, 300))
-        squ.draw(self.screen)
+        self.squ = chara.Square(200, "purple", (200, 300), self.screen)
+        self.squ.draw()
+        self.square = chara.Squ(100, (125, 135, 225), (300, 460), self.screen)
+
+    def mouse_move(self):
+        click = pygame.mouse.get_pressed()
+        if click[0]:
+            self.is_dragging = True
+            self.mouse_a, self.mouse_b = pygame.mouse.get_pos()
+            print("左键")
+        else:
+            self.is_dragging = False
+        if self.is_dragging:
+            self.mouse_c, self.mouse_d = pygame.mouse.get_pos()
+            self.x += self.mouse_c - self.mouse_a
+            self.y += self.mouse_d - self.mouse_b
+
+    def update(self):
+        self.came.update()
+        self.squ.update()
+        self.square.update(self.came.ps[1])
 
     def game_start(self):
         if self.screen.get_flags() & pygame.FULLSCREEN == 0:
             self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF)
-
+        # 成功解决按键不反应bug
+        pygame.key.stop_text_input()
         while True:
             self.event()
             self.build_scene()
 
             # 更新显示
-            self.came.update()
+            self.update()
             self.__update()
 
 
 if __name__ == '__main__':
     game = Game()
     game.game_start_menu()
+
