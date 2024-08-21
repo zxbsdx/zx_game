@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import math
+from tkinter.messagebox import *
 
 
 class Camera(pygame.sprite.Sprite):
@@ -165,31 +166,55 @@ class Squ(pygame.sprite.Sprite):
 
 # 创建一个透视变换的正方体对象
 class Perspective_squ(pygame.sprite.Sprite):
-    def __init__(self, x, y, z, xg, yg, zg):
+    # x, y, z是物体实际坐标， xg， yg， zg是地面坐标
+    def __init__(self, x, y, z, xc, yc, zc, xg, yg, zg, Ry, screen):
+        super().__init__()
         self.x = x
         self.y = y
         self.z = z
+        self.xc = xc
+        self.yc = yc
+        self.zc = zc
         self.xg = xg
         self.yg = yg
         self.zg = zg
+        self.Ry = Ry
+        self.screen = screen
 
-    def roty(self, xc, yc, zc, Ry):
+        for i in np.arange(len(x)):
+            xg.append(x[i] + self.xc)
+            yg.append(x[i] + self.yc)
+            zg.append(x[i] + self.zc)
+
+    # 按y轴旋转，实现3d效果
+    def roty(self, xc, yc, zc):
         a = [self.x, self.y, self.z]
-        b = [math.cos(Ry), 0, math.sin(Ry)]
+        b = [math.cos(self.Ry), 0, math.sin(self.Ry)]
         xpp = np.inner(a, b)
         b = [0, 1, 0]
         ypp = np.inner(a, b)
-        b = [-math.sin(Ry), 0, math.cos(Ry)]
+        b = [-math.sin(self.Ry), 0, math.cos(self.Ry)]
         zpp = np.inner(a, b)
         [xg, yg, zg] = [xpp + xc, ypp + yc, zpp + zc]
         return [xg, yg, zg]
 
-    def squrey(self, xc, yc, zc, Ry):
-        for i in range(len(self.x)):
-            [self.xg[i], self.yg[i], self.zg[i]] = self.roty(xc, yc, zc, self.x[i], self.y[i], self.z[i], Ry)
+    def draw(self):
+        for i in np.arange(len(self.x)):
+            # 使用 pygame.draw.rect
+            # 每个矩形的矩形对象
+            start_pos = (self.xg[i], self.yg[i])
+            if i + i > 9:
+                break
+            end_pos = (self.xg[i + 1], self.yg[i + 1])  # 如果想要绘制到下一个点
 
+            # 绘制矩形到屏幕
+            # pygame.draw.rect(self.screen, 'green', rect)
+            pygame.draw.line(self.screen, 'green', start_pos, end_pos)
+
+            # 实现摄像头与物体远近的变化， zfg表示纵向深度的变化
     def perspective(self, xfp, yfp, zfp):
         for i in range(len(self.x)):
+            self.plothousey(self.xc, self.yc, self.zc)
             a = self.xg[i] - xfp
             b = self.yg[i] - yfp
             c = self.zg[i] + abs(zfp)
@@ -204,9 +229,30 @@ class Perspective_squ(pygame.sprite.Sprite):
             self.xg[i] = xh
             self.yg[i] = yh
             self.zg[i] = zh
+            self.draw()
 
-    def draw(self):
-        pass
+    def plothousey(self, xc, yc, zc):
+        for i in range(len(self.x)):
+            [self.xg[i], self.yg[i], self.zg[i]] = self.roty(xc, yc, zc)
 
     def update(self, *args, **kwargs):
         super().update()
+
+
+# 弹出提示
+@staticmethod
+def sent(title, txt):
+    print(showinfo(title=title, message=txt))
+
+
+@staticmethod
+def warn(title, txt):
+    print(showwarning(title=title, message=txt))
+
+
+@staticmethod
+def show_mess(txt, color, screen, size):
+    font = pygame.font.Font(None, size)
+    text = font.render(txt, True, color)
+    screen.blit(text, (200, 200))
+

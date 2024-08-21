@@ -2,12 +2,14 @@ import pygame
 from const_var import *
 import chara
 import sys
+import ctypes
 
 
 class Game:
     # 窗口初始化
     def __init__(self):
         # 初始化变量
+        self.per_squ = None
         self.square = None
         self.squ = None
         self.mouse_d = None
@@ -23,10 +25,13 @@ class Game:
 
         self.x = 300
         self.y = 300
-
+        if not is_in:
+            chara.warn(title="hehe", txt="恭喜ni未打开游戏")
+            sys.exit()
         pygame.init()
+        chara.sent(title="hello", txt="恭喜成功打开游戏")
         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
-        pygame.display.set_caption("Zx_game_maze")
+        pygame.display.set_caption("Zx_game_maze", "./images/logo.ico")
         ico = pygame.image.load("./images/logo.ico")
         pygame.display.set_icon(ico)
         pygame.display.gl_set_attribute(1, 2)
@@ -142,6 +147,10 @@ class Game:
         self.squ = chara.Square(200, "purple", (200, 300), self.screen)
         self.squ.draw()
         self.square = chara.Squ(100, (125, 135, 225), (300, 460), self.screen)
+
+        chara.show_mess("what can I say", 'pink', self.screen, 86)
+        # self.per_squ = chara.Perspective_squ(x, y, z, xc, yc, zc, xg, yg, zg, Ry, self.screen)
+        # self.per_squ.perspective(xfp, yfp, zfp)
 
     def mouse_move(self):
         click = pygame.mouse.get_pressed()
