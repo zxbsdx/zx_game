@@ -8,7 +8,8 @@ Games for happy!!!
 还待开发中.......
 It's need time to finish...... 
 
-
+希望能坚持下去！！
+Hope I can hold it!!
 #### 使用说明
 
 

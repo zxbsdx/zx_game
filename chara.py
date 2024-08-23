@@ -240,17 +240,14 @@ class Perspective_squ(pygame.sprite.Sprite):
 
 
 # 弹出提示
-@staticmethod
 def sent(title, txt):
     print(showinfo(title=title, message=txt))
 
 
-@staticmethod
 def warn(title, txt):
     print(showwarning(title=title, message=txt))
 
 
-@staticmethod
 def show_mess(txt, color, screen, size):
     font = pygame.font.Font(None, size)
     text = font.render(txt, True, color)

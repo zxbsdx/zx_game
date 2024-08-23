@@ -1,9 +1,15 @@
 import pygame
-
+# 恭喜你找到了 是开始亦或是结束
+# Congratulations Is it a start or end
 is_in = False
-music = "./music/fly_to_the_sky.flac"
 
+music = "./music/fly_to_the_sky.flac"
+IS_GAME = 0
+END_ONE = False
+END_TWO = False
 pygame.font.init()
+
+PRESS = 0
 
 WINDOWS = pygame.Rect(0, 0, 730, 500)
 FRAME = 60
