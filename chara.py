@@ -2,6 +2,8 @@ import pygame
 import numpy as np
 import math
 from tkinter.messagebox import *
+import tkinter
+from PIL import ImageTk, Image
 
 
 class Camera(pygame.sprite.Sprite):
@@ -252,4 +254,66 @@ def show_mess(txt, color, screen, size):
     font = pygame.font.Font(None, size)
     text = font.render(txt, True, color)
     screen.blit(text, (200, 200))
+
+
+# 特色选择框
+def show_choice(butt1, butt2, txt, event1=None, event2=None):
+    tk = tkinter.Tk()
+    # 获取屏幕大小 弹出框居中
+    x = 280
+    y = 220
+    width = tk.winfo_screenwidth()
+    height = tk.winfo_screenheight()
+    tk.geometry("%dx%d+%d+%d" % (x, y, (width-x)/2, (height-y)/2))
+    tk.config(bg="white")
+    # tk.attributes('-alpha', 0.5)
+    # 设置窗口置顶显示
+    tk.attributes('-topmost', 1)
+    # 设置无状态栏
+    tk.overrideredirect(True)
+
+    # 让背景透明
+    tk.wm_attributes('-transparentcolor', 'white')  # 设置透明颜色
+
+    def close_window():
+        tk.destroy()
+
+    if event1 is None:
+        event1 = close_window
+
+    if event2 is None:
+        event2 = close_window
+
+    # 添加背景
+    image = Image.open("./images/butt_ch.png").convert("RGBA")
+    photo = ImageTk.PhotoImage(image=image)
+    images = tkinter.Label(tk, image=photo, bg='white')  # 使用 bg='pink' 使背景透明
+    images.image = photo  # 保持对图像的引用
+    images.place(y=-90, x=0)
+    # 添加文字
+    ques = tkinter.Label(tk, text=txt)
+    ques.config(bg='red', fg='brown', width=10, height=1)
+    ques.place(y=5, x=10)
+
+    butt_1 = tkinter.Button(tk, text=butt1)
+    butt_1.config(bg="brown", fg="red", width=7, height=1)
+    butt_1.size()
+    butt_1.place(y=140, x=50)
+
+    butt_2 = tkinter.Button(tk, text=butt2)
+    butt_2.config(bg="pink", fg="red", width=7, height=1)
+    butt_2.place(y=140, x=180)
+
+    # 绑定事件
+    butt_1.bind("<Button-1>", lambda event: event1())
+    butt_2.bind("<Button-1>", lambda event: event2())
+
+    tk.mainloop()
+
+
+def put_pic(path, ps, screen):
+    # 放一张图片
+    img = pygame.image.load(path)
+    screen.blit(img, ps)
+
 
