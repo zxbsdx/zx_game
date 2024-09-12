@@ -4,6 +4,9 @@ import math
 from tkinter.messagebox import *
 import tkinter
 from PIL import ImageTk, Image
+import const_var
+import json
+import pickle
 
 
 class Camera(pygame.sprite.Sprite):
@@ -250,10 +253,10 @@ def warn(title, txt):
     print(showwarning(title=title, message=txt))
 
 
-def show_mess(txt, color, screen, size):
+def show_mess(txt, color, screen, size, ps):
     font = pygame.font.Font(None, size)
     text = font.render(txt, True, color)
-    screen.blit(text, (200, 200))
+    screen.blit(text, ps)
 
 
 # 特色选择框
@@ -292,17 +295,17 @@ def show_choice(butt1, butt2, txt, event1=None, event2=None):
     images.place(y=-90, x=0)
     # 添加文字
     ques = tkinter.Label(tk, text=txt)
-    ques.config(bg='red', fg='brown', width=10, height=1)
-    ques.place(y=5, x=10)
+    ques.pack(side=tkinter.TOP, expand=True)
+    ques.place(y=170, x=60)
 
     butt_1 = tkinter.Button(tk, text=butt1)
-    butt_1.config(bg="brown", fg="red", width=7, height=1)
+    butt_1.config(bg="black", fg="white", width=7, height=1)
     butt_1.size()
-    butt_1.place(y=140, x=50)
+    butt_1.place(y=110, x=50)
 
     butt_2 = tkinter.Button(tk, text=butt2)
-    butt_2.config(bg="pink", fg="red", width=7, height=1)
-    butt_2.place(y=140, x=180)
+    butt_2.config(bg="black", fg="white", width=7, height=1)
+    butt_2.place(y=110, x=180)
 
     # 绑定事件
     butt_1.bind("<Button-1>", lambda event: event1())
@@ -315,5 +318,68 @@ def put_pic(path, ps, screen):
     # 放一张图片
     img = pygame.image.load(path)
     screen.blit(img, ps)
+
+
+# 输入数据
+def write(txt, string):
+    tk = tkinter.Tk()
+    # 获取屏幕大小 弹出框居中
+    x = 280
+    y = 220
+    width = tk.winfo_screenwidth()
+    height = tk.winfo_screenheight()
+    tk.geometry("%dx%d+%d+%d" % (x, y, (width - x) / 2, (height - y) / 2))
+    tk.config(bg="white")
+    # 设置窗口置顶显示
+    tk.attributes('-topmost', 1)
+    # 设置无状态栏
+    tk.overrideredirect(True)
+
+    ques = tkinter.Label(tk, text=txt)
+    ques.config(width=20, height=1)
+    ques.pack(side=tkinter.TOP, fill=tkinter.X)
+
+    # 添加一个输入框
+    entry = tkinter.Entry(tk, width=30)
+    entry.pack(side=tkinter.TOP, fill=tkinter.X)
+
+    with open(const_var.js, 'r') as jso:
+        st = json.load(jso)
+
+    def submit():
+        st[string] = entry.get()  # 获取输入框中的内容
+        with open(const_var.js, 'w') as jso:
+            json.dump(st, jso, indent=4)
+        tk.destroy()
+
+    butt1 = tkinter.Button(tk, text="确认", command=submit)
+    butt1.config(bg="black", fg="white", width=10, height=1)
+    butt1.pack(side=tkinter.BOTTOM, fill=tkinter.X)
+
+    tk.mainloop()
+
+
+# 点击事件
+def click(ps, sp, event):
+    mouse_pos = pygame.mouse.get_pos()
+
+    def is_within_bounds(mouse, x, y):
+        return ps[0] < mouse_pos[0] < sp[0] and ps[1] < mouse_pos[1] < sp[1]
+    c = pygame.mouse.get_pressed()
+    if is_within_bounds(mouse_pos, ps, sp) and c[0]:
+        event()
+
+
+# 存档与读档
+def save_game(game_state):
+    with open('save.pickle', 'wb') as f:
+        pickle.dump(game_state, f)
+
+
+def load_game():
+    with open('save.pickle', 'rb') as f:
+        game_state = pickle.load(f)
+    return game_state
+
 
 

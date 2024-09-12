@@ -2,10 +2,12 @@ import pygame
 from const_var import *
 import chara
 import sys
-import ctypes
 import random
 import os
 import json
+
+
+# 果然游戏开发还是用引擎 c语言吧
 
 
 class Game:
@@ -13,6 +15,7 @@ class Game:
     # windowsInit
     def __init__(self):
         # 初始化变量
+        self.expand = None
         self.per_squ = None
         self.square = None
         self.squ = None
@@ -32,16 +35,24 @@ class Game:
         self.END_TWO = END_TWO
         self.x = 300
         self.y = 300
-        self.one_x = 0
+        self.one_x = 0  # start
         self.one_y = 0
         self.open_value = 0
         self.st = None
         self.FP = FP
+        self.cloud = -200
+        self.cloud_1 = -250
+        self.cloud_2 = -150
 
         # 导入json文件
         with open(js, 'r') as jso:
             self.st = json.load(jso)
         # print(self.st['language'])
+
+        # 获取系统名称
+        self.st["name"] = os.getlogin()
+        with open(js, 'w') as jso:
+            json.dump(self.st, jso, indent=4)
 
         with open(out_var, 'r') as file:
             for line in file:
@@ -61,11 +72,11 @@ class Game:
                         json.dump(self.st, jso, indent=4)  # indent=4 是为了使 JSON 文件更加可读
 
                 def event_2():
-                    self.st["language"] = "eh"
+                    self.st["language"] = "ch"
                     with open(js, 'w') as jso:
-                        json.dump(self.st, jso, indent=4)  # indent=4 是为了使 JSON 文件更加可读
+                        json.dump(self.st, jso, indent=4)
 
-                chara.show_choice("eh", 'ch', 'language', event_1(), event_2())
+                chara.show_choice("English", 'Chinese', 'language', event_1(), event_2())
 
                 chara.warn(title="Superbia", txt="恭喜ni未打开游戏")
             if self.open_value == 1:
@@ -100,7 +111,7 @@ class Game:
             file.write(f"OPEN = {self.open_value}\n")
 
         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
-        pygame.display.set_caption("Zx_game_maze?", "./images/logo.ico")
+        pygame.display.set_caption("Coze", "./images/logo.ico")
         ico = pygame.image.load("./images/logo.ico")
         pygame.display.set_icon(ico)
         pygame.display.gl_set_attribute(1, 2)
@@ -135,11 +146,36 @@ class Game:
         self.screen.blit(re_img, (width * 0.01, height * 0.01))
         choose = [0, 1, 2]
         choose_is = False
+
+        # 召唤七色云彩
+        self.cloud += 1
+        chara.put_pic('./images/cloud.png', (self.cloud, height * 0.4), self.screen)
+        if self.cloud == 1000:
+            self.cloud = -300
+        self.cloud_1 += 0.5
+        chara.put_pic('./images/cloud.png', (self.cloud_1, height * 0.4 - 50), self.screen)
+        if self.cloud_1 == 800:
+            self.cloud_1 = -150
+        self.cloud_2 += 2
+        chara.put_pic('./images/cloud.png', (self.cloud_2, height * 0.4 - 230), self.screen)
+        if self.cloud_2 == 2000:
+            self.cloud_2 = -300
+            with open('./extend/st.json', 'rb') as jso:
+                self.st = json.load(jso)
+                # 成就判断
+                if self.st["cloud"] == 5:
+                    print("hehe achievement 1!!")
+                    self.st['cloud'] = 6
+            self.st['cloud'] += 1
+            with open('./extend/st.json', 'w') as jso:
+                json.dump(self.st, jso, indent=4)
+
+        # 按键捕获 有点问题
         for event in pygame.event.get():
+            # print(event)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
                     self.FP += 1
-                    print("right")
                 if event.key == pygame.K_LEFT:
                     self.FP -= 1
                 if event.key == pygame.K_UP:
@@ -156,34 +192,38 @@ class Game:
             self.FP %= 3
         # 兼容键盘选择
         if choose[self.FP] == 0:
-            chara.put_pic(triangle, (width * 0.3 + self.one_x - 20, height * 0.4 + self.one_y + 10, 0, 0), self.screen)
-            self.butt1 = chara.Button("Start", (width * 0.3 + self.one_x, height * 0.4 + self.one_y - 10), FONT, "blue",
+            chara.put_pic(triangle, (width * 0.3 + self.one_x - 20, height * 0.4 + self.one_y + 10 + 45, 0, 0), self.screen)
+            self.butt1 = chara.Button("Start", (width * 0.3 + self.one_x, height * 0.4 + self.one_y - 10 + 45), FONT, "blue",
                                       "pink", self.screen)
             self.butt1.draw()
         elif choose[self.FP] == 1:
-            chara.put_pic(triangle, (width * 0.5 - 20, height * 0.4 + 10, 0, 0), self.screen)
-            self.butt2 = chara.Button("Setting", (width * 0.5, height * 0.4 - 10), FONT, "blue", "pink",
+            chara.put_pic(triangle, (width * 0.5 - 20, height * 0.4 + 10 + 45, 0, 0), self.screen)
+            self.butt2 = chara.Button("Setting", (width * 0.5, height * 0.4 - 10 + 45), FONT, "blue", "pink",
                                       self.screen)
             self.butt2.draw()
 
         elif choose[self.FP] == 2:
-            chara.put_pic(triangle, (width * 0.7 - 20, height * 0.4 + 10, 0, 0), self.screen)
-            self.butt3 = chara.Button("About", (width * 0.7, height * 0.4 - 10), FONT, "red", "blue",
+            chara.put_pic(triangle, (width * 0.7 - 20, height * 0.4 + 10 + 45, 0, 0), self.screen)
+            self.butt3 = chara.Button("About", (width * 0.7, height * 0.4 - 10 + 45), FONT, "red", "blue",
                                       self.screen)
             self.butt3.draw()
+
+        # 提示
+        chara.show_mess("Left and Right to move", 'green', self.screen, 20, (width * 0.1, height * 0.95))
+        chara.show_mess("UP is confirm", 'green', self.screen, 20, (width * 0.5, height * 0.95))
 
         # 开始就一定开始吗
         # Is the start will start
         if choose[self.FP] != 0:
-            self.butt1 = chara.Button("Start", (width * 0.3 + self.one_x, height * 0.4 + self.one_y), FONT, "blue",
+            self.butt1 = chara.Button("Start", (width * 0.3 + self.one_x, height * 0.4 + self.one_y + 45), FONT, "blue",
                                       "pink", self.screen)
             self.butt1.draw()
         if choose[self.FP] != 1:
-            self.butt2 = chara.Button("Setting", (width * 0.5, height * 0.4), FONT, "blue", "pink",
+            self.butt2 = chara.Button("Setting", (width * 0.5, height * 0.4 + 45), FONT, "blue", "pink",
                                       self.screen)
             self.butt2.draw()
         if choose[self.FP] != 2:
-            self.butt3 = chara.Button("About", (width * 0.7, height * 0.4), FONT, "red", "blue",
+            self.butt3 = chara.Button("About", (width * 0.7, height * 0.4 + 45), FONT, "red", "blue",
                                       self.screen)
             self.butt3.draw()
         # self.draw("Start", "blue", (100, 200))
@@ -203,10 +243,10 @@ class Game:
                 self.PRESS += 1
                 self.one_x = 0
                 self.one_y = 0
-                chara.show_mess("Rest or not", 'blue', self.screen, 86)
+                chara.show_mess("Rest or not", 'blue', self.screen, 86, (200, 200))
 
             if self.PRESS == 100:
-                chara.show_mess("Ok you win", 'red', self.screen, 100)
+                chara.show_mess("Ok you win", 'red', self.screen, 100, (200, 200))
                 self.game_start()
 
         if self.butt2.is_clicked():
@@ -254,6 +294,10 @@ class Game:
 
             back_button = chara.Button("Back", (width * 0.9, height * 0.9), FONT, "red", "blue", self.screen)
             back_button.draw()
+
+            # 提示
+            chara.show_mess('Up and down to move', 'yellow', self.screen, 20, (width * 0.1, height * 0.95))
+            chara.show_mess('Right is confirm. Left is return', 'yellow', self.screen, 20, (width * 0.5, height * 0.95))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -334,7 +378,7 @@ class Game:
         self.squ.draw()
         self.square = chara.Squ(100, (125, 135, 225), (300, 460), self.screen)
 
-        chara.show_mess("what can I say", 'pink', self.screen, 86)
+        chara.show_mess("what can I say", 'pink', self.screen, 86, (200, 200))
         # self.per_squ = chara.Perspective_squ(x, y, z, xc, yc, zc, xg, yg, zg, Ry, self.screen)
         # self.per_squ.perspective(xfp, yfp, zfp)
 
@@ -355,30 +399,95 @@ class Game:
         self.squ.update()
         self.square.update(self.came.ps[1])
 
+    # 建立敲代码场景
+    def create_scene(self):
+        # 导入全景图片
+        bg = pygame.image.load("./images/game.jpg")
+        w, h = self.screen.get_size()
+        bg_scale = pygame.transform.scale(bg, (w, h))
+        self.screen.blit(bg_scale, (0, 0))
+
+        def com_expand():
+            self.expand = True
+
+        def water():
+            chara.show_mess('It\'s a cup of water', 'pink', self.screen, 60, (200, 200))
+
+        def mouse():
+            chara.show_mess('what can i say', 'pink', self.screen, 60, (200, 200))
+
+        def knife():
+            chara.show_mess('Is this a knife?', 'pink', self.screen, 60, (200, 200))
+
+        if self.expand:
+            chara.put_pic('./images/code.png', (125, 27), self.screen)
+
+        # 测试代码 找准位置
+        pygame.draw.circle(self.screen, 'pink', (pygame.mouse.get_pos()), 2, 0)
+        if pygame.mouse.get_pressed()[0]:
+            print(pygame.mouse.get_pos())
+
+        # 点击事件
+        chara.click((214, 58), (419, 171), com_expand)
+        chara.click((67, 158), (105, 235), water)
+        chara.click((616, 299), (644, 374), mouse)
+        chara.click((22, 303), (101, 338), knife)
+        chara.click((522, 320), (608, 343), knife)
+
+    def code_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                if self.IS_GAME == 1:
+                    self.__quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    if self.screen.get_flags() & pygame.FULLSCREEN != 0:
+                        self.screen = pygame.display.set_mode((645, 481), pygame.RESIZABLE)
+
     def game_start(self):
+        # 全屏还不是时候
         if self.screen.get_flags() & pygame.FULLSCREEN == 0:
-            self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF)
+             self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF)
         # 成功解决按键不反应bug
         # successfully solved the keyEvent not to act bug
         pygame.key.stop_text_input()
 
         # 提问阶段
+        if self.open_value == 8:
+            chara.write("输入你的name:", 'name_in')
+
+        def eve1():
+            self.st["python"] = True
+            with open(js, 'w') as jso:
+                json.dump(self.st, jso, indent=4)
+
+        if self.open_value == 8:
+            chara.show_choice('会', '不会', 'Do you get the python?', eve1())
         while True:
             # 一个分支 Do you get the python?
+
             # 敲代码路线
-
+            if self.st['python']:
+                self.create_scene()
+                self.code_event()
             # maze game
-            self.event()
-
-            # 小心一直往前走你可能真的到达那个地方
-            # 迷宫路线
-            self.build_scene()
+            else:
+                self.event()
+                # 小心一直往前走你可能真的到达那个地方
+                # 迷宫路线
+                self.build_scene()
+                self.update()
 
             # 当两结局都达成
             if END_ONE and END_TWO:
                 pass
             # 更新显示 update display
-            self.update()
+
+            # 全屏过剧情
+            if not self.screen.get_flags() & pygame.FULLSCREEN == 0:
+                self.screen.fill('black')
+                chara.show_mess('press the Esc to continue', 'white', self.screen, 88, (200, 250))
+
             self.__update()
 
 

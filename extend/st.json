@@ -1,4 +1,8 @@
 {
-    "language": "eh",
-    "is_in": true
+    "language": "",
+    "is_in": false,
+    "name": "",
+    "name_in": "",
+    "python": false,
+    "cloud": 0
 }

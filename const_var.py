@@ -13,13 +13,17 @@ pygame.font.init()
 
 PRESS = 0
 
-WINDOWS = pygame.Rect(0, 0, 730, 500)
+WINDOWS = pygame.Rect(0, 0, 600, 600)
 FRAME = 60
 SIZE_TITLE = 35
 FONT = pygame.font.SysFont('Times New Roman', size=SIZE_TITLE)
 FP = 0
 
 SCENE = (1000, 1000)
+
+GAME_STATE = {
+    'level': 0
+}
 
 # 房子坐标
 x = [-20, -20, 20, 20, -20, -20, 20, 20, -20, 20]
@@ -50,3 +54,5 @@ language_dll = ctypes.CDLL('./extend/language.dll')
 # picture
 triangle = "./images/triangle.png"
 page = './images/page.jpg'
+
+
