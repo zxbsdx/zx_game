@@ -4,5 +4,9 @@
     "name": "",
     "name_in": "",
     "python": false,
-    "cloud": 0
+    "cloud": 0,
+    "wait_while": false,
+    "run_away": false,
+    "open_win": false,
+    "passwd": ""
 }

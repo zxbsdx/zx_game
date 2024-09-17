@@ -1,3 +1,4 @@
+import os
 import pygame
 import numpy as np
 import math
@@ -7,6 +8,7 @@ from PIL import ImageTk, Image
 import const_var
 import json
 import pickle
+import getpass
 
 
 class Camera(pygame.sprite.Sprite):
@@ -254,7 +256,7 @@ def warn(title, txt):
 
 
 def show_mess(txt, color, screen, size, ps):
-    font = pygame.font.Font(None, size)
+    font = pygame.font.Font("./font/手写.ttf", size)
     text = font.render(txt, True, color)
     screen.blit(text, ps)
 
@@ -314,10 +316,11 @@ def show_choice(butt1, butt2, txt, event1=None, event2=None):
     tk.mainloop()
 
 
-def put_pic(path, ps, screen):
+def put_pic(path, ps, screen, size):
     # 放一张图片
     img = pygame.image.load(path)
-    screen.blit(img, ps)
+    re_img = pygame.transform.scale(img, size)
+    screen.blit(re_img, ps)
 
 
 # 输入数据
@@ -381,5 +384,55 @@ def load_game():
         game_state = pickle.load(f)
     return game_state
 
+
+# 获取桌面背景
+def get_background():
+    path = "C:/Users/" + getpass.getuser() + "/AppData/Roaming/Microsoft/windows/Themes/CachedFiles"
+    get_path = path + '/' + os.listdir(path)[0]
+    return get_path
+
+
+def input_gai(size, ps_rect, screen, get_input, event_in):
+    font = pygame.font.Font('./font/庞门正道标题体免费版.ttf', size)
+    input_box = pygame.Rect(ps_rect)
+
+    color_inactive = pygame.Color('red')
+    color = color_inactive
+
+    # 确保 get_input 是一个列表以允许修改
+    if isinstance(get_input, str):
+        get_input = [get_input]
+
+    # 事件判断
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                print(''.join(get_input))
+                passwd = ''.join(get_input)
+                print(os.system(f'runas/users:{os.getlogin()} cmd && {passwd}'))
+                get_input.clear()  # 清空输入
+            elif event.key == pygame.K_BACKSPACE:
+
+                if get_input:
+                    get_input[-1] = get_input[-1][:-1]  # 删除最后一个字符
+            elif event.key == pygame.K_ESCAPE:
+                if screen.get_flags() & pygame.FULLSCREEN != 0:
+                    screen = pygame.display.set_mode((645, 481), pygame.RESIZABLE)
+            elif event.key == pygame.K_q:
+                pygame.quit()
+                exit()
+            else:
+                # 将新字符添加到 get_input 中
+                if get_input:
+                    get_input[-1] += event.unicode
+                else:
+                    get_input.append(event.unicode)  # 当输入为空时，首次添加字符
+
+    pygame.draw.rect(screen, color, input_box, 2)
+    text_surface = font.render(''.join(get_input), True, (255, 255, 255))
+    screen.blit(text_surface, (input_box.x + 5, input_box.y + 5))
 
 

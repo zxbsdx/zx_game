@@ -2,8 +2,11 @@ import pygame
 import ctypes
 import os
 import json
-# 恭喜你找到了 是开始亦或是结束
+
+# 是开始亦或是结束
 # Congratulations Is it a start or end
+
+RAIN = pygame.USEREVENT
 
 music = "./music/fly_to_the_sky.flac"
 IS_GAME = 0
@@ -16,7 +19,7 @@ PRESS = 0
 WINDOWS = pygame.Rect(0, 0, 600, 600)
 FRAME = 60
 SIZE_TITLE = 35
-FONT = pygame.font.SysFont('Times New Roman', size=SIZE_TITLE)
+FONT = pygame.font.Font("./font/手写.ttf", 30)
 FP = 0
 
 SCENE = (1000, 1000)
