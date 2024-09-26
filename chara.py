@@ -9,6 +9,7 @@ import const_var
 import json
 import pickle
 import getpass
+import screen_brightness_control as sbc
 
 
 class Camera(pygame.sprite.Sprite):
@@ -436,3 +437,27 @@ def input_gai(size, ps_rect, screen, get_input, event_in):
     screen.blit(text_surface, (input_box.x + 5, input_box.y + 5))
 
 
+# 范围判断
+def is_within_bounds(mouse, x, y):
+    return x[0] < mouse[0] < y[0] and x[1] < mouse[1] < y[1]
+
+
+# 调节亮度
+def set_brightness(bright):
+    sbc.set_brightness(bright)
+
+
+# 获取亮度大小
+def get_brightness():
+    sbc.get_brightness()
+
+
+# 映射数值改变
+def map_value(x, original_min, original_max, target_min, target_max):
+    # 确保 x 在原始范围内
+    if x < original_min or x > original_max:
+        raise ValueError("x must be between {} and {}".format(original_min, original_max))
+
+        # 线性映射
+    mapped_value = (x - original_min) / (original_max - original_min) * (target_max - target_min) + target_min
+    return mapped_value

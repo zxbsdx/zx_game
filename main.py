@@ -1,5 +1,4 @@
 import time
-
 import pygame
 from const_var import *
 import chara
@@ -18,6 +17,11 @@ class Game:
     # windowsInit
     def __init__(self):
         # 初始化变量
+        self.bright = 100
+        self.value = 100
+        self.light = 0
+        self.volume = 0
+        self.sound = 0
         self.text = []
         self.yzx = 33
         self.xyz = 22
@@ -123,6 +127,7 @@ class Game:
         pygame.display.set_icon(ico)
         pygame.display.gl_set_attribute(1, 2)
         # 播放背景音乐
+        pygame.mixer.init()
         # play the background music
         pygame.mixer.music.load(music)
         pygame.mixer.music.play()
@@ -208,7 +213,7 @@ class Game:
                     pass
             if event.type == RAIN:
                 # 下雨事件
-                print("下个毛线")
+                pass
 
         if self.FP >= 3 or self.FP < 0:
             self.FP %= 3
@@ -288,15 +293,15 @@ class Game:
             self.screen.fill("black")
             choose = [0, 1, 2]
             if choose[self.FP] == 0:
-                chara.put_pic("./images/triangle_t.png", (width * 0.5 - 260, height * 0.5 - 210), self.screen, (22, 22))
+                chara.put_pic("./images/triangle_t.png", (width * 0.5 - 260, height * 0.5 - 200), self.screen, (22, 22))
                 chara.show_mess("Volume", "yellow", ps=(width * 0.5 - 220, height * 0.5 - 200), screen=self.screen,
                                 size=22)
             if choose[self.FP] == 1:
-                chara.put_pic("./images/triangle_t.png", (width * 0.5 - 260, height * 0.5 - 160), self.screen, (22, 22))
+                chara.put_pic("./images/triangle_t.png", (width * 0.5 - 260, height * 0.5 - 150), self.screen, (22, 22))
                 chara.show_mess("Sound", "yellow", ps=(width * 0.5 - 220, height * 0.5 - 150), screen=self.screen,
                                 size=22)
             if choose[self.FP] == 2:
-                chara.put_pic("./images/triangle_t.png", (width * 0.5 - 260, height * 0.5 - 110), self.screen, (22, 22))
+                chara.put_pic("./images/triangle_t.png", (width * 0.5 - 260, height * 0.5 - 100), self.screen, (22, 22))
                 chara.show_mess("Light", "yellow", ps=(width * 0.5 - 220, height * 0.5 - 100), screen=self.screen,
                                 size=22)
 
@@ -311,20 +316,61 @@ class Game:
                 chara.show_mess("Light", "yellow", ps=(width * 0.5 - 230, height * 0.5 - 100), screen=self.screen,
                                 size=22)
 
+            # 读取音量和亮度初始化
+            self.value = pygame.mixer.music.get_volume()
+            self.bright = chara.get_brightness()
+
+            self.sound = chara.map_value(self.value, 0, 1, 195, 350)
+            self.light = chara.map_value(self.bright, 0, 100, 195, 350)
             # 画个拉条
             pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 185),
                              (width * 0.5 + 50, height * 0.5 - 185))
-            pygame.draw.circle(self.screen, 'green', (width * 0.5 - 100, height * 0.5 - 185), 5, 0)
-            pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 150),
-                             (width * 0.5 + 50, height * 0.5 - 150))
-            pygame.draw.circle(self.screen, 'green', (width * 0.5 - 100, height * 0.5 - 150), 5, 0)
-            pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 100),
-                             (width * 0.5 + 50, height * 0.5 - 100))
-            pygame.draw.circle(self.screen, 'green', (width * 0.5 - 100, height * 0.5 - 100), 5, 0)
+            pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 - self.sound, height * 0.5 - 185), 5, 0)
+            pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 135),
+                             (width * 0.5 + 50, height * 0.5 - 135))
+            pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 - self.volume, height * 0.5 - 135), 5, 0)
+            pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 85),
+                             (width * 0.5 + 50, height * 0.5 - 85))
+            pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 - self.light, height * 0.5 - 85), 5, 0)
 
             back_button = chara.Button("Back", (width * 0.9, height * 0.9), FONT, "red", "blue", self.screen)
             back_button.draw()
 
+            # 拖动拉条
+            click = pygame.mouse.get_pressed()
+            mouse = pygame.mouse.get_pos()
+            xxx = (195, 100)
+            yyy = (350, 133)
+            xxxx = (195, 150)
+            yyyy = (350, 180)
+            xx_xx = (195, 200)
+            yy_yy = (350, 230)
+
+            # 输出变量的值
+            chara.show_mess(f"{int(self.value)}", 'orange', self.screen, 22, (width * 0.5 + 100, height * 0.5 - 195))
+            chara.show_mess(f"{int(self.bright)}", 'orange', self.screen, 22, (width * 0.5 + 100, height * 0.5 - 95))
+
+            if click[0]:
+                if chara.is_within_bounds(mouse, xxx, yyy):
+                    self.sound = -(pygame.mouse.get_pos()[0] - width * 0.5 + 50) + 95
+                    # 调整音量
+                    sound = pygame.mouse.get_pos()[0]
+                    self.value = chara.map_value(sound, 195, 350, 0, 100)
+                    pygame.mixer.music.set_volume(self.value)
+
+                if chara.is_within_bounds(mouse, xxxx, yyyy):
+                    self.volume = -(pygame.mouse.get_pos()[0] - width * 0.5 + 50) + 95
+                if chara.is_within_bounds(mouse, xx_xx, yy_yy):
+                    self.light = -(pygame.mouse.get_pos()[0] - width * 0.5 + 50) + 95
+                    bright = pygame.mouse.get_pos()[0]
+                    self.bright = chara.map_value(bright, 195, 350, 0, 100)
+                    chara.set_brightness(self.bright)
+            else:
+                pass
+            # 测试代码 找准位置
+            # pygame.draw.circle(self.screen, 'pink', (pygame.mouse.get_pos()), 2, 0)
+            # if pygame.mouse.get_pressed()[0]:
+            #     print(pygame.mouse.get_pos())
             # 提示
             chara.show_mess('Up and down to move', 'yellow', self.screen, 20, (width * 0.1 - 50, height * 0.95))
             chara.show_mess('Right is confirm.', 'yellow', self.screen, 20, (width * 0.5 + 120, height * 0.95))
@@ -336,7 +382,6 @@ class Game:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         self.FP -= 1
-                        print("up")
                     if event.key == pygame.K_DOWN:
                         self.FP += 1
                     if event.key == pygame.K_LEFT:
@@ -344,6 +389,7 @@ class Game:
                     if event.key == pygame.K_RIGHT:
                         pass
                 elif event.type == pygame.MOUSEBUTTONDOWN:
+
                     if back_button.is_clicked():
                         self.screen.fill("black")
                         return  # 退出设置并返回菜单 quit the setting and back to the menu
@@ -370,6 +416,8 @@ class Game:
                     if self.screen.get_flags() & pygame.FULLSCREEN != 0:
                         self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
                     print("Esc was pressed")
+                elif event.key == pygame.K_q:
+                    self.__quit()
 
         # 按键事件 为什么这需要按着鼠标才能检测到事件？？
         # KeyEvent why it needed press the mouse can detect the event
@@ -494,7 +542,9 @@ class Game:
 
         if self.open_value == 8:
             chara.show_choice('会', '不会', 'Do you get the python?', eve1())
+
         executed = False  # 标志变量
+
         while True:
             # 一个分支 Do you get the python?
 
@@ -533,7 +583,7 @@ class Game:
                         self.yzx = 137
 
                 def login():
-                    print("login  ll l l  l l l l ")
+                    print('ok')
                 chara.put_pic('./images/lock.png', (590, 350), self.screen, (self.xyz, self.yzx))
                 if self.xyz == 123:
                     chara.input_gai(22, (530, 300, 220, 32), self.screen, self.text, login)
