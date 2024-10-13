@@ -58,4 +58,5 @@ language_dll = ctypes.CDLL('./extend/language.dll')
 triangle = "./images/triangle.png"
 page = './images/page.jpg'
 
-
+# video
+switch = "./video/switch_off.mp4"

@@ -8,5 +8,5 @@
     "wait_while": false,
     "run_away": false,
     "open_win": false,
-    "passwd": ""
+    "passwd": "password"
 }

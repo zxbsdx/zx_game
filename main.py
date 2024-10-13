@@ -7,7 +7,7 @@ import random
 import os
 import json
 import getpass
-
+import cv2
 
 # 果然游戏开发还是用引擎 c语言吧
 
@@ -17,8 +17,8 @@ class Game:
     # windowsInit
     def __init__(self):
         # 初始化变量
-        self.bright = 100
-        self.value = 100
+
+        self.bright = 50
         self.light = 0
         self.volume = 0
         self.sound = 0
@@ -132,6 +132,8 @@ class Game:
         pygame.mixer.music.load(music)
         pygame.mixer.music.play()
         self.clock = pygame.time.Clock()
+
+        self.value = pygame.mixer.music.get_volume()
 
         # 设置事件时间
         pygame.time.set_timer(RAIN, 1000)
@@ -316,22 +318,18 @@ class Game:
                 chara.show_mess("Light", "yellow", ps=(width * 0.5 - 230, height * 0.5 - 100), screen=self.screen,
                                 size=22)
 
-            # 读取音量和亮度初始化
-            self.value = pygame.mixer.music.get_volume()
-            self.bright = chara.get_brightness()
-
             self.sound = chara.map_value(self.value, 0, 1, 195, 350)
             self.light = chara.map_value(self.bright, 0, 100, 195, 350)
             # 画个拉条
             pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 185),
                              (width * 0.5 + 50, height * 0.5 - 185))
-            pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 - self.sound, height * 0.5 - 185), 5, 0)
+            pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 + self.value, height * 0.5 - 185), 5, 0)
             pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 135),
                              (width * 0.5 + 50, height * 0.5 - 135))
             pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 - self.volume, height * 0.5 - 135), 5, 0)
             pygame.draw.line(self.screen, 'white', (width * 0.5 - 100, height * 0.5 - 85),
                              (width * 0.5 + 50, height * 0.5 - 85))
-            pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 - self.light, height * 0.5 - 85), 5, 0)
+            pygame.draw.circle(self.screen, 'green', (width * 0.5 + 50 - self.bright, height * 0.5 - 85), 5, 0)
 
             back_button = chara.Button("Back", (width * 0.9, height * 0.9), FONT, "red", "blue", self.screen)
             back_button.draw()
@@ -347,12 +345,13 @@ class Game:
             yy_yy = (350, 230)
 
             # 输出变量的值
-            chara.show_mess(f"{int(self.value)}", 'orange', self.screen, 22, (width * 0.5 + 100, height * 0.5 - 195))
+            value = chara.map_value(self.value, 0, 1, 0, 100)
+            chara.show_mess(f"{int(value)}", 'orange', self.screen, 22, (width * 0.5 + 100, height * 0.5 - 195))
             chara.show_mess(f"{int(self.bright)}", 'orange', self.screen, 22, (width * 0.5 + 100, height * 0.5 - 95))
 
             if click[0]:
                 if chara.is_within_bounds(mouse, xxx, yyy):
-                    self.sound = -(pygame.mouse.get_pos()[0] - width * 0.5 + 50) + 95
+                    self.value = -(pygame.mouse.get_pos()[0] - width * 0.5 + 50) + 95
                     # 调整音量
                     sound = pygame.mouse.get_pos()[0]
                     self.value = chara.map_value(sound, 195, 350, 0, 100)
@@ -412,11 +411,7 @@ class Game:
                 self.game_start()
             # 检测键盘按键  detect the keyboard
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    if self.screen.get_flags() & pygame.FULLSCREEN != 0:
-                        self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
-                    print("Esc was pressed")
-                elif event.key == pygame.K_q:
+                if event.key == pygame.K_q:
                     self.__quit()
 
         # 按键事件 为什么这需要按着鼠标才能检测到事件？？
@@ -551,7 +546,8 @@ class Game:
             # 敲代码路线
 
             if self.st["open_win"]:
-                chara.show_mess('press the Esc to continue', 'white', self.screen, 88, (120, 250))
+                if not self.screen.get_flags() & pygame.FULLSCREEN == 0:
+                    self.screen = pygame.display.set_mode(WINDOWS.size, pygame.RESIZABLE)
                 if self.st['python']:
                     self.create_scene()
                     self.code_event()
@@ -570,7 +566,7 @@ class Game:
 
             # 全屏过剧情
             # 假锁屏 输入密码
-            if not self.screen.get_flags() & pygame.FULLSCREEN == 0:
+            if not self.screen.get_flags() & pygame.FULLSCREEN == 0 and not self.st["open_win"]:
                 # 图片适应背景
                 chara.put_pic(chara.get_background(), (0, 0), self.screen, (1920, 1080))
 
@@ -590,22 +586,52 @@ class Game:
                     # 如果输入正确的提示 获取密码提示
                     if self.text:
                         if self.text[0] == 'hello':
-                            chara.show_mess('The password is your password for your user', 'pink', self.screen, 32, (400, 500))
+                            chara.show_mess('The password is password', 'pink', self.screen, 32, (400, 500))
+                        if self.text[0] == self.st['passwd']:
+                            # 播放开机动画
+                            cap = cv2.VideoCapture(switch)
+
+                            if not cap.isOpened():
+                                print("Error: Unable to open video file.")
+                                exit()
+
+                                # 创建一个窗口
+                            cv2.namedWindow('Video', cv2.WND_PROP_FULLSCREEN)
+                            cv2.setWindowProperty('Video', cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+
+                            while True:
+                                ret, frame = cap.read()  # 逐帧读取视频
+                                if not ret:
+                                    break  # 如果视频结束，退出循环
+
+                                cv2.imshow('Video', frame)  # 显示帧
+
+                                # 按键 'q' 退出
+                                if cv2.waitKey(25) & 0xFF == ord('q'):
+                                    break
+
+                                    # 释放视频捕获对象并关闭窗口  q
+                            cap.release()
+                            cv2.destroyAllWindows()
+                            self.st["open_win"] = True
+                            with open(js, 'w') as jso:
+                                json.dump(self.st, jso, indent=4)
+
                 chara.click((590, 350), (590 + self.xyz, 350 + self.yzx), cli)
 
-            else:
-                # huo得成就逃逸
-                if self.st["run_away"]:
-                    if not executed:
-                        pygame.time.wait(3000)
-                    self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF)
-                    executed = True
-                chara.show_mess("Where you can go?", "red", self.screen, 22, (20, 20))
-                self.st["run_away"] = True
-                chara.warn("警告", "这里是哪？")
-
-                with open(js, 'w') as jso:
-                    json.dump(self.st, jso, indent=4)
+            # else:
+            #     # huo得成就逃逸
+            #     if self.st["run_away"]:
+            #         if not executed:
+            #             pygame.time.wait(3000)
+            #         self.screen = pygame.display.set_mode((1920, 1080), pygame.FULLSCREEN | pygame.DOUBLEBUF)
+            #         executed = True
+            #     chara.show_mess("Where you can go?", "red", self.screen, 22, (20, 20))
+            #     self.st["run_away"] = True
+            #     chara.warn("警告", "这里是哪？")
+            #
+            #     with open(js, 'w') as jso:
+            #         json.dump(self.st, jso, indent=4)
             self.event()
             self.__update()
 
